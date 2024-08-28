@@ -1,3 +1,5 @@
+"use client";
+
 import { AudioInput, AudioOutput, AssistantInput, SessionSettings, PauseAssistantMessage } from './types';
 import { CloseEvent, ErrorEvent } from './events';
 import { ReconnectingWebSocket } from './WebSocket';
@@ -91,13 +93,13 @@ export class ChatSocket {
     this.recvReadyState = recvSocket.readyState;
 
     this.sendSocket.addEventListener('open', this.handleSendOpen);
-    this.sendSocket.addEventListener('message', this.handleSendMessage);
     this.sendSocket.addEventListener('close', this.handleSendClose);
     this.sendSocket.addEventListener('error', this.handleSendError);
     this.recvSocket.addEventListener('open', this.handleRecvOpen);
     this.recvSocket.addEventListener('message', this.handleRecvMessage);
     this.recvSocket.addEventListener('close', this.handleRecvClose);
     this.recvSocket.addEventListener('error', this.handleRecvError);
+    this.id_count = 1
   }
 
   /**
@@ -116,7 +118,14 @@ export class ChatSocket {
     event: T,
     callback: ChatSocket.EventHandlers[T],
   ) {
-    this.sendEventHandlers[event] = callback;
+    if (event === 'message') {
+      this.recvEventHandlers[event] = callback;
+    } else if (event === 'error') {
+      this.sendEventHandlers[event] = callback;
+      this.recvEventHandlers[event] = callback;
+    } else {
+      this.sendEventHandlers[event] = callback;
+    }
   }
 
   /**
@@ -205,7 +214,6 @@ export class ChatSocket {
     this.recvSocket.reconnect();
 
     this.sendSocket.addEventListener('open', this.handleSendOpen);
-    this.sendSocket.addEventListener('message', this.handleSendMessage);
     this.sendSocket.addEventListener('close', this.handleSendClose);
     this.sendSocket.addEventListener('error', this.handleSendError);
     this.recvSocket.addEventListener('open', this.handleRecvOpen);
@@ -225,7 +233,6 @@ export class ChatSocket {
     this.handleSendClose({ code: 1000 } as CloseEvent);
 
     this.sendSocket.removeEventListener('open', this.handleSendOpen);
-    this.sendSocket.removeEventListener('message', this.handleSendMessage);
     this.sendSocket.removeEventListener('close', this.handleSendClose);
     this.sendSocket.removeEventListener('error', this.handleSendError);
     this.recvSocket.removeEventListener('open', this.handleRecvOpen);
@@ -278,48 +285,19 @@ export class ChatSocket {
     this.recvEventHandlers.open?.();
   };
 
-  private handleSendMessage = (event: { data: string }): void => {
-    const data = JSON.parse(event.data);
-
-    const parsedResponse = serializers.empathicVoice.SubscribeEvent.parse(
-      data,
-      {
-        unrecognizedObjectKeys: 'passthrough',
-        allowUnrecognizedUnionMembers: true,
-        allowUnrecognizedEnumValues: true,
-        breadcrumbsPrefix: ['response'],
-      },
-    );
-    if (parsedResponse.ok) {
-      this.eventHandlers.message?.({
-        ...parsedResponse.value,
-        receivedAt: new Date(),
-      });
-    } else {
-      this.eventHandlers.error?.(new Error(`Received unknown message type`));
-    }
-  };
-
   private handleRecvMessage = (event: { data: string }): void => {
     console.log('recv event.data', event.data);
-    const data = JSON.parse(event.data);
 
-    const parsedResponse = serializers.empathicVoice.SubscribeEvent.parse(
-      data,
-      {
-        unrecognizedObjectKeys: 'passthrough',
-        allowUnrecognizedUnionMembers: true,
-        allowUnrecognizedEnumValues: true,
-        breadcrumbsPrefix: ['response'],
-      },
-    );
-    if (parsedResponse.ok) {
-      this.eventHandlers.message?.({
-        ...parsedResponse.value,
-        receivedAt: new Date(),
-      });
+    if (true) {
+      const audioOutputObject: AudioOutput = {
+        type: 'audio_output',
+        id: String(this.id_count),
+        data: event.data
+      };
+      this.recvEventHandlers.message?.(audioOutputObject);
+      this.id_count++;
     } else {
-      this.eventHandlers.error?.(new Error(`Received unknown message type`));
+      this.recvEventHandlers.error?.(new Error(`Received unknown message type`));
     }
   };
 

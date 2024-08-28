@@ -148,10 +148,25 @@ export const useSoundPlayer = (props: {
       }
 
       try {
-        const blob = convertBase64ToBlob(message.data, 'audio/mp3');
+        const blob = message.data;
         const arrayBuffer = await blob.arrayBuffer();
-        const audioBuffer =
-          await audioContext.current.decodeAudioData(arrayBuffer);
+        const numberOfChannels = 1;
+        const sampleRate = 16000;
+        const numberOfFrames = arrayBuffer.byteLength / (numberOfChannels * 2);
+
+        const audioBuffer = audioContext.current.createBuffer(numberOfChannels, numberOfFrames, sampleRate);
+
+        for (let channel = 0; channel < numberOfChannels; channel++) {
+            const nowBuffering = audioBuffer.getChannelData(channel);
+            const int16Array = new Int16Array(arrayBuffer, channel * numberOfFrames * 2, numberOfFrames);
+            const float32Array = new Float32Array(int16Array.length);
+
+            for (let i = 0; i < int16Array.length; i++) {
+              float32Array[i] = int16Array[i] / 32768.0;
+            }
+
+            nowBuffering.set(float32Array);
+        }
 
         clipQueue.current.push({
           id: message.id,

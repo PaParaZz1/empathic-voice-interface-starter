@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useRef, useState } from 'react';
 import { AudioOutput, JsonMessage } from './types';
 import { ChatSocket } from './ChatSocket';
@@ -80,8 +82,6 @@ export const useVoiceClient = (props: {
           message.type === 'user_message' ||
           message.type === 'user_interruption' ||
           message.type === 'error' ||
-          message.type === 'tool_response' ||
-          message.type === 'tool_error' ||
           message.type === 'chat_metadata' ||
           message.type === 'assistant_end'
         ) {
@@ -89,55 +89,6 @@ export const useVoiceClient = (props: {
           onMessage.current?.(messageWithReceivedAt);
           return;
         }
-
-        if (message.type === 'tool_call') {
-          const messageWithReceivedAt = { ...message, receivedAt: new Date() };
-          onMessage.current?.(messageWithReceivedAt);
-          void onToolCall
-            .current?.(messageWithReceivedAt, {
-              success: (content: unknown) => ({
-                type: 'tool_response',
-                toolCallId: messageWithReceivedAt.toolCallId,
-                content: JSON.stringify(content),
-              }),
-              error: ({
-                error,
-                code,
-                level,
-                content,
-              }: {
-                error: string;
-                code: string;
-                level: string;
-                content: string;
-              }) => ({
-                type: 'tool_error',
-                toolCallId: messageWithReceivedAt.toolCallId,
-                error,
-                code,
-                level: level !== null ? 'warn' : undefined, // level can only be warn
-                content,
-              }),
-            })
-            .then((response) => {
-              // check that response is a correctly formatted response or error payload
-              // TODO
-              const parsedResponse = {type: 'tool_response', ok: true};
-              const parsedError = {type: 'tool_error', ok: true};
-
-              // if valid send it to the socket
-              // otherwise, report error
-              if (response.type === 'tool_response' && parsedResponse.ok) {
-                client.current?.sendToolResponseMessage(response);
-              } else if (response.type === 'tool_error' && parsedError.ok) {
-                client.current?.sendToolErrorMessage(response);
-              } else {
-                onError.current?.('Invalid response from tool call');
-              }
-            });
-          return;
-        }
-
         // asserts that all message types are handled
         isNever(message);
         return;
