@@ -1,7 +1,10 @@
-import { useVoice } from "@humeai/voice-react";
+"use client";
+
+
 import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "./ui/button";
 import { Phone } from "lucide-react";
+import { useVoice } from "./VoiceProvider";
+import { Button } from "./ui/button";
 
 export default function StartCall() {
   const { status, connect } = useVoice();
@@ -44,7 +47,7 @@ export default function StartCall() {
                     stroke={"currentColor"}
                   />
                 </span>
-                <span>Start Call</span>
+                <span>开始交互</span>
               </Button>
             </motion.div>
           </AnimatePresence>

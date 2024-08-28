@@ -36,7 +36,7 @@ export const Nav = () => {
         <HumeLogo className={"h-5 w-auto"} />
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
-        <Button
+        { false && <Button
           onClick={() => {
             window.open(
               pkg.homepage,
@@ -52,6 +52,7 @@ export const Nav = () => {
           </span>
           <span>Star on GitHub</span>
         </Button>
+        }
         <Button
           onClick={toggleDark}
           variant={"ghost"}

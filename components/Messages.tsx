@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/utils";
-import { useVoice } from "@humeai/voice-react";
+import { useVoice } from "./VoiceProvider";
 import Expressions from "./Expressions";
 import { AnimatePresence, motion } from "framer-motion";
 import { ComponentRef, forwardRef } from "react";

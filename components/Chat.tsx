@@ -1,10 +1,10 @@
 "use client";
 
-import { VoiceProvider } from "@humeai/voice-react";
+import { ComponentRef, useRef } from "react";
+import { VoiceProvider } from "./VoiceProvider";
 import Messages from "./Messages";
 import Controls from "./Controls";
 import StartCall from "./StartCall";
-import { ComponentRef, useRef } from "react";
 
 export default function ClientComponent({
   accessToken,
@@ -21,7 +21,8 @@ export default function ClientComponent({
       }
     >
       <VoiceProvider
-        auth={{ type: "accessToken", value: accessToken }}
+        sendHostname="xxx"
+        recvHostname="xxx"
         onMessage={() => {
           if (timeout.current) {
             window.clearTimeout(timeout.current);

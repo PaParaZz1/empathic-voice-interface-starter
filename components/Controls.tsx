@@ -1,5 +1,7 @@
 "use client";
-import { useVoice } from "@humeai/voice-react";
+
+
+import { useVoice } from "./VoiceProvider";
 import { Button } from "./ui/button";
 import { Mic, MicOff, Phone } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -73,7 +75,7 @@ export default function Controls() {
                   stroke={"currentColor"}
                 />
               </span>
-              <span>End Call</span>
+              <span>结束交互</span>
             </Button>
           </motion.div>
         ) : null}
