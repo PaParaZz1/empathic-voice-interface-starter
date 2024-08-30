@@ -1,4 +1,4 @@
-import { JsonMessage, AssistantMessage, UserMessage, AudioOutput, SessionSettings } from './types';
+import { JsonMessage, AssistantMessage, UserMessage, AudioOutput, SessionSettings, ChatMetadata } from './types';
 import React, {
   createContext,
   FC,
@@ -48,10 +48,12 @@ export type VoiceContextType = {
   isAudioMuted: boolean;
   isPlaying: boolean;
   messages: (
-    | (JsonMessage & { receivedAt: Date })
+    | JsonMessage
     | ConnectionMessage
+    | UserMessage
+    | AssistantMessage
   )[];
-  lastVoiceMessage: thicVoice.AssistantMessage | null;
+  lastVoiceMessage: AssistantMessage | null;
   lastUserMessage: UserMessage | null;
   clearMessages: () => void;
   mute: () => void;
@@ -82,8 +84,7 @@ export type VoiceProviderProps = PropsWithChildren<SocketConfig> & {
   onMessage?: (message: any) => void;
   onError?: (err: VoiceError) => void;
   onOpen?: () => void;
-  onClose?: ChatSocket.sendEventHandlers['close'];
-  onToolCall?: ToolCallHandler;
+  onClose?: () => void;
   /**
    * @default true
    * @description Clear messages when the voice is disconnected.
@@ -174,12 +175,11 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       player.addToQueue(message);
     },
     onMessage: useCallback(
-      (message: JsonMessage & { receivedAt: Date }) => {
+      (message: JsonMessage & { receivedAt: Date } | AssistantMessage | UserMessage) => {
         // store message
         messageStore.onMessage(message);
 
         if (
-          message.type === 'user_interruption' ||
           message.type === 'user_message'
         ) {
           player.clearQueue();
@@ -195,16 +195,15 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       props.onOpen?.();
     }, [messageStore, props, startTimer]),
     onClose: useCallback<
-      NonNullable<ChatSocket.sendEventHandlers['close']>
+      NonNullable<any>
     >(
-      (event) => {
+      (event: Event) => {
         stopTimer();
         messageStore.createDisconnectMessage();
-        onClose.current?.(event);
+        onClose.current?.();
       },
       [messageStore, stopTimer],
     ),
-    onToolCall: props.onToolCall,
   });
 
   const mic = useMicrophone({
@@ -361,7 +360,6 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
         sendSessionSettings: client.sendSessionSettings,
         sendPauseAssistantMessage: client.sendPauseAssistantMessage,
         sendResumeAssistantMessage: client.sendResumeAssistantMessage,
-        sendToolMessage: client.sendToolMessage,
         status,
         unmute: mic.unmute,
         unmuteAudio: player.unmuteAudio,
@@ -393,7 +391,6 @@ export const VoiceProvider: FC<VoiceProviderProps> = ({
       client.sendUserInput,
       client.sendAssistantInput,
       client.sendSessionSettings,
-      client.sendToolMessage,
       client.sendPauseAssistantMessage,
       client.sendResumeAssistantMessage,
       status,

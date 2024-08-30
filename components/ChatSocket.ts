@@ -1,6 +1,6 @@
 "use client";
 
-import { AudioInput, AudioOutput, AssistantInput, SessionSettings, PauseAssistantMessage } from './types';
+import { AudioInput, AudioOutput, AssistantInput, SessionSettings, PauseAssistantMessage, ResumeAssistantMessage } from './types';
 import { CloseEvent, ErrorEvent } from './events';
 import { ReconnectingWebSocket } from './WebSocket';
 
@@ -86,6 +86,8 @@ export class ChatSocket {
   protected readonly sendEventHandlers: ChatSocket.EventHandlers = {};
   protected readonly recvEventHandlers: ChatSocket.EventHandlers = {};
 
+  private idCount: number;
+
   constructor({ sendSocket, recvSocket }: ChatSocket.Args) {
     this.sendSocket = sendSocket;
     this.recvSocket = recvSocket;
@@ -99,7 +101,7 @@ export class ChatSocket {
     this.recvSocket.addEventListener('message', this.handleRecvMessage);
     this.recvSocket.addEventListener('close', this.handleRecvClose);
     this.recvSocket.addEventListener('error', this.handleRecvError);
-    this.id_count = 1
+    this.idCount = 1
   }
 
   on<T extends keyof ChatSocket.EventHandlers>(
@@ -230,15 +232,15 @@ export class ChatSocket {
   }
 
   public async tillSocketOpen(): Promise<ReconnectingWebSocket> {
-    if (this.socket.readyState === ReconnectingWebSocket.OPEN) {
-      return this.socket;
+    if (this.sendSocket.readyState === ReconnectingWebSocket.OPEN) {
+      return this.sendSocket;
     }
     return new Promise((resolve, reject) => {
-      this.socket.addEventListener('open', () => {
-        resolve(this.socket);
+      this.sendSocket.addEventListener('open', () => {
+        resolve(this.sendSocket);
       });
 
-      this.socket.addEventListener('error', (event: unknown) => {
+      this.sendSocket.addEventListener('error', (event: unknown) => {
         reject(event);
       });
     });
@@ -254,15 +256,8 @@ export class ChatSocket {
     }
   }
 
-  private sendJson(payload: PublishEvent): void {
-    const jsonPayload = serializers.empathicVoice.PublishEvent.jsonOrThrow(
-      payload,
-      {
-        unrecognizedObjectKeys: 'strip',
-      },
-    );
-    console.log('json', jsonPayload);
-    this.sendSocket.send(JSON.stringify(jsonPayload));
+  private sendJson(payload: any): void {
+    this.sendSocket.send(JSON.stringify(payload));
   }
 
   private handleSendOpen = () => {
@@ -287,13 +282,14 @@ export class ChatSocket {
     if (true) {
       const audioOutputObject: AudioOutput = {
         type: 'audio_output',
-        id: String(this.id_count),
+        id: String(this.idCount),
         data: audioInt16,
         question: jsonData.question_text,
         answer: jsonData.answer_text,
       };
+      // @ts-ignore
       this.recvEventHandlers.message?.(audioOutputObject);
-      this.id_count++;
+      this.idCount++;
     } else {
       this.recvEventHandlers.error?.(new Error(`Received unknown message type`));
     }

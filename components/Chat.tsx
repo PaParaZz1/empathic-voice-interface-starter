@@ -21,8 +21,8 @@ export default function ClientComponent({
       }
     >
       <VoiceProvider
-        sendHostname={process.env.NEXT_PUBLIC_FX_SEND_HOST}
-        recvHostname={process.env.NEXT_PUBLIC_FX_RECV_HOST}
+        sendHostname={process.env.NEXT_PUBLIC_FX_SEND_HOST || "ws://localhost:3001"}
+        recvHostname={process.env.NEXT_PUBLIC_FX_RECV_HOST || "ws://localhost:3002"}
         onMessage={() => {
           if (timeout.current) {
             window.clearTimeout(timeout.current);

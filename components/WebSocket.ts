@@ -1,4 +1,5 @@
 import { WebSocket as NodeWebSocket } from 'ws';
+import { RUNTIME } from "./runtime";
 import * as Events from './events';
 
 export interface Runtime {

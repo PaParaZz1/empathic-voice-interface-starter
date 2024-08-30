@@ -9,7 +9,7 @@ export const useMessages = ({
   messageHistoryLimit,
 }: {
   sendMessageToParent?: (
-    message: JsonMessage & { receivedAt: Date },
+    message: JsonMessage | AssistantMessage | UserMessage,
   ) => void;
   messageHistoryLimit: number;
 }) => {
@@ -19,8 +19,10 @@ export const useMessages = ({
 
   const [messages, setMessages] = useState<
     Array<
-      | (JsonMessage & { receivedAt: Date })
+      | JsonMessage
       | ConnectionMessage
+      | AssistantMessage
+      | UserMessage
     >
   >([]);
 
@@ -55,7 +57,7 @@ export const useMessages = ({
   }, []);
 
   const onMessage = useCallback(
-    (message: JsonMessage & { receivedAt: Date }) => {
+    (message: JsonMessage | AssistantMessage | UserMessage) => {
       /* 
       1. message comes in from the backend
         - if the message IS NOT AssistantTranscriptMessage, store in `messages` immediately  
@@ -68,6 +70,7 @@ export const useMessages = ({
         case 'assistant_message':
           // for assistant messages, `sendMessageToParent` is called in `onPlayAudio`
           // in order to line up the transcript event with the correct audio clip
+          // @ts-ignore
           setVoiceMessageMap((prev) => ({
             ...prev,
             [`${message.id}`]: message,
