@@ -52,7 +52,7 @@ const Messages = forwardRef<
                       "text-xs capitalize font-medium leading-none opacity-50 pt-4 px-3"
                     )}
                   >
-                    {msg.message.role}
+                    {msg.type == "user_message" ? "游客用户" : "感染力大师"}
                   </div>
                   <div className={"pb-3 px-3"}>{msg.message.content}</div>
                 </motion.div>

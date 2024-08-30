@@ -102,18 +102,6 @@ export class ChatSocket {
     this.id_count = 1
   }
 
-  /**
-   * @param event - The event to attach to.
-   * @param callback - The callback to run when the event is triggered.
-   *
-   * @example
-   * ```ts
-   * const socket = hume.empathicVoice.chat.connect({ apiKey: "...." });
-   * socket.on('open', () => {
-   *  console.log('Socket opened');
-   * });
-   * ```
-   */
   on<T extends keyof ChatSocket.EventHandlers>(
     event: T,
     callback: ChatSocket.EventHandlers[T],

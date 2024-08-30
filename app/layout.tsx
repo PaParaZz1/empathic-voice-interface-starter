@@ -6,8 +6,14 @@ import { Nav } from "@/components/Nav";
 import { cn } from "@/utils";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3001'),
   title: "FenXuan - Speech to Speech Agent",
   description: "FX-S2S next.js Interface",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png'
+  }
 };
 
 export default function RootLayout({
@@ -17,6 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head />
       <body
         className={cn(
           GeistSans.variable,

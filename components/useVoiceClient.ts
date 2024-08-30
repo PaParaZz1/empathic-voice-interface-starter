@@ -60,8 +60,9 @@ export const useVoiceClient = (props: {
 
   const connect = useCallback((config: SocketConfig) => {
     return new Promise((resolve, reject) => {
-      const sendSocket = new ReconnectingWebSocket(`ws://${config.sendHostname}`);
-      const recvSocket = new ReconnectingWebSocket(`ws://${config.recvHostname}`);
+      console.log('cfg', config)
+      const sendSocket = new ReconnectingWebSocket(`${config.sendHostname}`);
+      const recvSocket = new ReconnectingWebSocket(`${config.recvHostname}`);
       client.current = new ChatSocket({ sendSocket, recvSocket })
 
       client.current.on('open', () => {
