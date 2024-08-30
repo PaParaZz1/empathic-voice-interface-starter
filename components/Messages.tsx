@@ -1,7 +1,6 @@
 "use client";
 import { cn } from "@/utils";
 import { useVoice } from "./VoiceProvider";
-import Expressions from "./Expressions";
 import { AnimatePresence, motion } from "framer-motion";
 import { ComponentRef, forwardRef } from "react";
 
@@ -56,7 +55,6 @@ const Messages = forwardRef<
                     {msg.message.role}
                   </div>
                   <div className={"pb-3 px-3"}>{msg.message.content}</div>
-                  <Expressions values={{ ...msg.models.prosody?.scores }} />
                 </motion.div>
               );
             }

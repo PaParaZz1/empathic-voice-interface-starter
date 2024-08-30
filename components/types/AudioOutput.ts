@@ -7,4 +7,6 @@ export interface AudioOutput {
   id: string;
   /** Base64 encoded audio output. This encoded audio is transmitted to the client, where it can be decoded and played back as part of the user interaction. */
   data: string;
+  question?: string;
+  answer?: string;
 }

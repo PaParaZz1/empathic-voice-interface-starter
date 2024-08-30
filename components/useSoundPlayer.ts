@@ -148,8 +148,7 @@ export const useSoundPlayer = (props: {
       }
 
       try {
-        const blob = message.data;
-        const arrayBuffer = await blob.arrayBuffer();
+        const arrayBuffer = message.data;
         const numberOfChannels = 1;
         const sampleRate = 16000;
         const numberOfFrames = arrayBuffer.byteLength / (numberOfChannels * 2);

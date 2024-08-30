@@ -286,13 +286,23 @@ export class ChatSocket {
   };
 
   private handleRecvMessage = (event: { data: string }): void => {
-    console.log('recv event.data', event.data);
+    const jsonData = JSON.parse(event.data);
+    const audioBase64 = jsonData.answer_audio;
+    const audioBytes = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+    const dataView = new DataView(audioBytes.buffer);
+    const audioInt16 = new Int16Array(audioBytes.length / 2);
+    
+    for (let i = 0; i < audioInt16.length; i++) {
+        audioInt16[i] = dataView.getInt16(i * 2, true);
+    }
 
     if (true) {
       const audioOutputObject: AudioOutput = {
         type: 'audio_output',
         id: String(this.id_count),
-        data: event.data
+        data: audioInt16,
+        question: jsonData.question_text,
+        answer: jsonData.answer_text,
       };
       this.recvEventHandlers.message?.(audioOutputObject);
       this.id_count++;

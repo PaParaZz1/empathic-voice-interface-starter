@@ -19,7 +19,7 @@ export interface UserMessage {
   /** Transcript of the message. */
   message: ChatMessage;
   /** Start and End time of user message. */
-  time: MillisecondInterval;
+  time?: MillisecondInterval;
   /** Indicates if this message was inserted into the conversation as text from a [User Input](/reference/empathic-voice-interface-evi/chat/chat#send.User%20Input.text) message. */
   fromText: boolean;
 }

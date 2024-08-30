@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from 'react';
-import { AudioOutput, JsonMessage } from './types';
+import { AudioOutput, JsonMessage, AssistantMessage, UserMessage } from './types';
 import { ChatSocket } from './ChatSocket';
 import { ReconnectingWebSocket } from './WebSocket';
 
@@ -73,7 +73,36 @@ export const useVoiceClient = (props: {
       client.current.on('message', (message) => {
         if (message.type === 'audio_output') {
           const messageWithReceivedAt = { ...message, receivedAt: new Date() };
-          onAudioMessage.current?.(messageWithReceivedAt);
+          if (message.question) {
+            const questionMessage: UserMessage = {
+              type: 'user_message',
+              fromText: false,
+              message: {
+                role: 'user',
+                content: message.question,
+              },
+              receivedAt: new Date(),
+            };
+            onMessage.current?.(questionMessage);
+          }
+          if (message.answer) {
+            const textMessage: AssistantMessage = {
+              type: 'assistant_message',
+              id: message.id,
+              fromText: false,
+              message: {
+                role: 'assistant',
+                content: message.answer,
+              },
+              receivedAt: new Date(),
+            };
+            onMessage.current?.(textMessage);
+          }
+          // delay 100ms to make sure the audio message is played after the text message
+
+          setTimeout(() => {
+            onAudioMessage.current?.(messageWithReceivedAt);
+          }, 200);
           return;
         }
 
