@@ -101,6 +101,7 @@ export const useMicrophone = (props: MicrophoneProps) => {
   const isMutedRef = useRef(isMuted);
 
   const [fft, setFft] = useState<number[]>(generateEmptyFft());
+  // @ts-ignore
   const currentAnalyzer = useRef<Meyda.MeydaAnalyzer | null>(null);
   const mimeTypeRef = useRef<MimeType | null>(null);
 

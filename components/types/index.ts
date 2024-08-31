@@ -9,3 +9,4 @@ export * from './AudioOutput';
 export * from './SessionSettings';
 export * from './PauseAssistantMessage';
 export * from './ResumeAssistantMessage';
+export * from './UserInterruption';

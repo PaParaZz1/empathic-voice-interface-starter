@@ -15,4 +15,5 @@ export interface AssistantMessage {
   message: ChatMessage;
   /** Indicates if this message was inserted into the conversation as text from an [Assistant Input message](/reference/empathic-voice-interface-evi/chat/chat#send.Assistant%20Input.text). */
   fromText: boolean;
+  receivedAt?: Date;
 }

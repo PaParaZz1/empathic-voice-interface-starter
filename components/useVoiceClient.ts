@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from 'react';
-import { AudioOutput, JsonMessage, AssistantMessage, UserMessage } from './types';
+import { AudioOutput, JsonMessage, AssistantMessage, UserMessage, SessionSettings } from './types';
 import { ChatSocket } from './ChatSocket';
 import { ReconnectingWebSocket } from './WebSocket';
 
@@ -31,7 +31,7 @@ export const useVoiceClient = (props: {
   ) => void;
   onError?: (message: string, error?: Error) => void;
   onOpen?: () => void;
-  onClose?: ChatSocket.sendEventHandlers['close'];
+  onClose?: () => void;
 }) => {
   const client = useRef<ChatSocket | null>(null);
 
@@ -84,6 +84,7 @@ export const useVoiceClient = (props: {
               },
               receivedAt: new Date(),
             };
+            // @ts-ignore
             onMessage.current?.(questionMessage);
           }
           if (message.answer) {
@@ -97,6 +98,7 @@ export const useVoiceClient = (props: {
               },
               receivedAt: new Date(),
             };
+            // @ts-ignore
             onMessage.current?.(textMessage);
           }
           // delay 100ms to make sure the audio message is played after the text message
@@ -107,25 +109,14 @@ export const useVoiceClient = (props: {
           return;
         }
 
-        if (
-          message.type === 'assistant_message' ||
-          message.type === 'user_message' ||
-          message.type === 'user_interruption' ||
-          message.type === 'error' ||
-          message.type === 'chat_metadata' ||
-          message.type === 'assistant_end'
-        ) {
-          const messageWithReceivedAt = { ...message, receivedAt: new Date() };
-          onMessage.current?.(messageWithReceivedAt);
-          return;
-        }
         // asserts that all message types are handled
+        // @ts-ignore
         isNever(message);
         return;
       });
 
       client.current.on('close', (event) => {
-        onClose.current?.(event);
+        onClose.current?.();
         setReadyState(VoiceReadyState.CLOSED);
       });
 

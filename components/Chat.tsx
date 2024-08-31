@@ -7,9 +7,7 @@ import Controls from "./Controls";
 import StartCall from "./StartCall";
 
 export default function ClientComponent({
-  accessToken,
 }: {
-  accessToken: string;
 }) {
   const timeout = useRef<number | null>(null);
   const ref = useRef<ComponentRef<typeof Messages> | null>(null);

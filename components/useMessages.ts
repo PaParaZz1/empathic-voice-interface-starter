@@ -1,4 +1,4 @@
-import { AssistantMessage, UserMessage, ChatMetadata, JsonMessage } from './types';
+import { AssistantMessage, UserMessage, ChatMetadata, JsonMessage, UserInterruption } from './types';
 import { useCallback, useState } from 'react';
 
 import type { ConnectionMessage } from './connection-message';
@@ -9,7 +9,7 @@ export const useMessages = ({
   messageHistoryLimit,
 }: {
   sendMessageToParent?: (
-    message: JsonMessage | AssistantMessage | UserMessage,
+    message: JsonMessage | AssistantMessage | UserMessage | UserInterruption,
   ) => void;
   messageHistoryLimit: number;
 }) => {
@@ -23,6 +23,7 @@ export const useMessages = ({
       | ConnectionMessage
       | AssistantMessage
       | UserMessage
+      | UserInterruption
     >
   >([]);
 
@@ -57,7 +58,7 @@ export const useMessages = ({
   }, []);
 
   const onMessage = useCallback(
-    (message: JsonMessage | AssistantMessage | UserMessage) => {
+    (message: JsonMessage | AssistantMessage | UserMessage | UserInterruption) => {
       /* 
       1. message comes in from the backend
         - if the message IS NOT AssistantTranscriptMessage, store in `messages` immediately  
@@ -84,10 +85,7 @@ export const useMessages = ({
           });
           break;
         case 'user_interruption':
-        case 'error':
-        case 'tool_call':
-        case 'tool_response':
-        case 'tool_error':
+        //case 'error':
           sendMessageToParent?.(message);
           setMessages((prev) => {
             return keepLastN(messageHistoryLimit, prev.concat([message]));

@@ -22,4 +22,5 @@ export interface UserMessage {
   time?: MillisecondInterval;
   /** Indicates if this message was inserted into the conversation as text from a [User Input](/reference/empathic-voice-interface-evi/chat/chat#send.User%20Input.text) message. */
   fromText: boolean;
+  receivedAt?: Date;
 }
